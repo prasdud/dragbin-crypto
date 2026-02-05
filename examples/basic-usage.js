@@ -13,7 +13,7 @@ import {
   encryptFile,
   decryptFile,
   encryptPrivateKey,
-} from '@dragbin/crypto';
+} from '../src/index.ts';
 
 async function main() {
   console.log('🔐 @dragbin/crypto - Basic Usage Example\n');

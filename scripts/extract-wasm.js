@@ -36,22 +36,34 @@ export default kyber;
 
   // Extract Argon2 WASM
   const argon2Path = require.resolve('hash-wasm/dist/argon2.umd.min.js');
-  const argon2Source = fs.readFileSync(argon2Path, 'utf8');
+  let argon2Source = fs.readFileSync(argon2Path, 'utf8');
+
+  // Transform UMD wrapper: check browser globals BEFORE CommonJS
+  // This fixes bundler-injected CommonJS shims taking priority over browser globals
+  // Original order: CommonJS → AMD → browser
+  // New order: browser globals (globalThis/window/self) → CommonJS → AMD
+  argon2Source = argon2Source.replace(
+    /"object"==typeof exports&&"undefined"!=typeof module\?I\(exports\):"function"==typeof define&&define\.amd\?define\(\["exports"\],I\):I\(\(A="undefined"!=typeof globalThis\?globalThis:A\|\|self\)\.hashwasm=A\.hashwasm\|\|\{\}\)/g,
+    '"undefined"!=typeof globalThis?I((A=globalThis).hashwasm=A.hashwasm||{}):"undefined"!=typeof window?I((A=window).hashwasm=A.hashwasm||{}):"undefined"!=typeof self?I((A=self).hashwasm=A.hashwasm||{}):"object"==typeof exports&&"undefined"!=typeof module?I(exports):"function"==typeof define&&define.amd?define(["exports"],I):I(A={})'
+  );
+
   const argon2Output = path.join(OUTPUT_DIR, 'argon2.wasm.js');
 
   // Wrap in a module that creates an exports object and re-exports the function
-  const argon2Wrapper = `// Auto-generated WASM bundle. Do not edit manually.
-
-const exports = {};
-
-${argon2Source}
-
-export const argon2id = exports.argon2id;
-`;
+  const argon2Wrapper = `// Auto-generated WASM bundle. Do not edit manually.                                                                                                                                                                 
+                                                                                                                                                                                                                                              
+  // Force the UMD wrapper to use the correct global object                                                                                                                                                                                   
+  const _globalThis = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : self);                                                                                                                       
+  ${argon2Source}                                                                                                                                                                                                                             
+                                                                                                                                                                                                                                              
+  // Get argon2id from the global that hash-wasm populates                                                                                                                                                                                    
+  export const argon2id = _globalThis.hashwasm.argon2id;                                                                                                                                                                                      
+  `; 
 
   fs.writeFileSync(argon2Output, argon2Wrapper);
   console.log('✓ Extracted Argon2 WASM to', argon2Output);
 
+  
   console.log('\n✅ WASM extraction complete!');
 } catch (error) {
   console.error('❌ Error extracting WASM:', error.message);

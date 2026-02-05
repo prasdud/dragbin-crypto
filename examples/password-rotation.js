@@ -11,7 +11,7 @@ import {
   decryptFile,
   encryptPrivateKey,
   decryptPrivateKey,
-} from '@dragbin/crypto';
+} from '../src/index.ts';
 
 async function main() {
   console.log('🔄 @dragbin/crypto - Password Rotation Example\n');
