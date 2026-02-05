@@ -70,7 +70,7 @@ export async function encryptFile(
   // Import the Kyber-generated secret as AES-GCM session key
   const sessionKey = await crypto.subtle.importKey(
     'raw',
-    rawSessionKey,
+    new Uint8Array(rawSessionKey),
     { name: 'AES-GCM' },
     false,
     ['encrypt'],
