@@ -58,3 +58,6 @@ export { deriveKeyFromPassword } from './keyDerivation.js';
 
 // Export utility functions
 export { generateSalt } from './utils.js';
+
+// Export message encryption/decryption
+export { encryptMessage, decryptMessage } from './message.js';

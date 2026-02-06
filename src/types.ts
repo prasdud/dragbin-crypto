@@ -53,3 +53,13 @@ export interface FileMetadata {
   /** Version of the encryption format */
   version: string;
 }
+
+/**
+ * Result of message encryption
+ */
+export interface EncryptedMessage {
+  /** Complete encrypted message data (metadata + encrypted content) */
+  encryptedData: Uint8Array;
+  /** Kyber-encrypted session key (can be stored separately if needed) */
+  kyberEncryptedSessionKey: Uint8Array;
+}
