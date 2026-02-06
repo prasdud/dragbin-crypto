@@ -61,3 +61,6 @@ export { generateSalt } from './utils.js';
 
 // Export message encryption/decryption
 export { encryptMessage, decryptMessage } from './message.js';
+
+// Export symmetric message encryption/decryption
+export { encryptSymmetricMessage, decryptSymmetricMessage } from './symmetric-message.js';

@@ -63,3 +63,12 @@ export interface EncryptedMessage {
   /** Kyber-encrypted session key (can be stored separately if needed) */
   kyberEncryptedSessionKey: Uint8Array;
 }
+
+/**
+ * Result of symmetric message encryption
+ */
+export interface SymmetricEncryptedMessage {
+  /** Complete encrypted message data (metadata + encrypted content) */
+  encryptedData: Uint8Array;
+  salt: Uint8Array; // Salt used for key derivation (16 bytes)
+}
