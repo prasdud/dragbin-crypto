@@ -4,7 +4,7 @@ Features needed in `@dragbin/crypto` to support messaging and social media appli
 
 ## Tier 1 — Must-have
 
-### 1. Lightweight message encryption
+### 1. Lightweight message encryption ✅ DONE
 
 The current `encryptFile` prepends a 10KB metadata header and chunks at 1KB. For chat messages this is excessive overhead. Need a compact API that does Kyber KEM + single AES-GCM encrypt with no chunking or padding.
 
@@ -20,7 +20,7 @@ decryptMessage(ciphertext: Uint8Array, encryptedSessionKey: Uint8Array, privateK
 
 ---
 
-### 2. Symmetric encrypt/decrypt (password-only mode)
+### 2. Symmetric encrypt/decrypt (password-only mode) ✅ DONE
 
 For shared-secret chat rooms where everyone knows the password. No Kyber involved — just Argon2id key derivation + AES-GCM.
 
@@ -36,7 +36,7 @@ decryptSymmetric(ciphertext: Uint8Array, password: string, salt: Uint8Array, iv:
 
 ---
 
-### 3. Key serialization
+### 3. Key serialization ✅ DONE
 
 Everything is raw `Uint8Array` currently. App developers need to store keys in databases, send over HTTP, put in JWTs. The `bytesToBase64`/`base64ToBytes` helpers exist in `utils.ts` but aren't exported.
 
@@ -53,7 +53,7 @@ importKeyPair(encoded: { publicKey: string, privateKey: string }) → KyberKeyPa
 
 ## Tier 2 — Important
 
-### 4. Key fingerprinting
+### 4. Key fingerprinting ✅ DONE
 
 Users need to verify each other's identity — "does this public key belong to who I think it does?" SHA-256 hash of the public key, formatted for human comparison.
 

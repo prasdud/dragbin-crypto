@@ -106,3 +106,27 @@ export function numberToBytes(num: number): Uint8Array {
 export function bytesToNumber(bytes: Uint8Array): number {
   return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
 }
+
+/**
+ * Create a fingerprint of a byte array using SHA-256
+ * @param data - Data to hash
+ * @returns Hexadecimal fingerprint
+ */
+export async function createFingerprint(data: Uint8Array): Promise<string> {
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data as any);
+  const hex = bytesToHex(new Uint8Array(hashBuffer));
+  return hex.match(/.{1,8}/g)?.join(' ').toUpperCase() || '';
+}
+
+/**
+ * Compare fingerprints of two byte arrays
+ * @param data1 - First data
+ * @param data2 - Second data
+ * @returns True if fingerprints match, false otherwise
+ * Note: This is a simple comparison and does not use constant-time comparison since it's not used for authentication in this context
+ */
+export async function compareFingerprints(data1: Uint8Array, data2: Uint8Array): Promise<boolean> {
+  const fingerprint1 = await createFingerprint(data1);
+  const fingerprint2 = await createFingerprint(data2);
+  return fingerprint1 === fingerprint2;
+}

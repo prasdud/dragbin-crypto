@@ -57,7 +57,7 @@ export { decryptPrivateKey } from './decryption.js';
 export { deriveKeyFromPassword } from './keyDerivation.js';
 
 // Export utility functions
-export { generateSalt } from './utils.js';
+export { generateSalt, createFingerprint, compareFingerprints } from './utils.js';
 
 // Export message encryption/decryption
 export { encryptMessage, decryptMessage } from './message.js';
