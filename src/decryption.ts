@@ -2,7 +2,7 @@
  * File decryption using Kyber + AES-GCM
  */
 
-import { decryptWithKyber } from './kyber.js';
+import { kyberDecapsulate } from './kyber.js';
 import { deriveKeyFromPassword } from './keyDerivation.js';
 import { base64ToBytes, bytesToNumber } from './utils.js';
 
@@ -110,12 +110,6 @@ export async function decryptFile(
   salt: Uint8Array,
   iv: Uint8Array,
 ): Promise<Uint8Array> {
-  // console.log('[DEBUG] decryptFile called with:');
-  console.log('  - encryptedData size:', encryptedData.length);
-  console.log('  - encryptedPrivateKey size:', encryptedPrivateKey.length);
-  console.log('  - salt size:', salt.length);
-  console.log('  - iv size:', iv.length);
-
   if (encryptedData.length < METADATA_SIZE) {
     throw new Error('Invalid encrypted file: too small');
   }
@@ -136,36 +130,14 @@ export async function decryptFile(
   if (!metadata.kyberEncryptedSessionKey) {
     throw new Error('Invalid metadata: missing kyberEncryptedSessionKey');
   }
-  // console.log('[DEBUG] Metadata parsed successfully');
-  console.log('  - kyberEncryptedSessionKey length (base64):', metadata.kyberEncryptedSessionKey.length);
-
   // Step 2: Decrypt Kyber private key
-  // console.log('[DEBUG] Step 2: Decrypting private key...');
-  try {
-    const privateKey = await decryptPrivateKey(encryptedPrivateKey, password, salt, iv);
-    // console.log('[DEBUG] Private key decrypted successfully, size:', privateKey.length);
-  } catch (error: any) {
-    console.error('[DEBUG] Failed to decrypt private key:', error.message);
-    throw new Error('Failed to decrypt private key: ' + error.message);
-  }
   const privateKey = await decryptPrivateKey(encryptedPrivateKey, password, salt, iv);
 
   // Step 3: Decrypt session key
-  // console.log('[DEBUG] Step 3: Decrypting session key...');
   const kyberEncryptedSessionKey = base64ToBytes(metadata.kyberEncryptedSessionKey);
-  // console.log('[DEBUG] Kyber encrypted session key size:', kyberEncryptedSessionKey.length);
-
-  try {
-    const rawSessionKey = await decryptWithKyber(kyberEncryptedSessionKey, privateKey);
-    // console.log('[DEBUG] Session key decrypted successfully, size:', rawSessionKey.length);
-  } catch (error: any) {
-    console.error('[DEBUG] Failed to decrypt session key with Kyber:', error.message);
-    throw new Error('Failed to decrypt session key: ' + error.message);
-  }
-  const rawSessionKey = await decryptWithKyber(kyberEncryptedSessionKey, privateKey);
+  const rawSessionKey = await kyberDecapsulate(kyberEncryptedSessionKey, privateKey);
 
   // Import session key
-  // console.log('[DEBUG] Importing session key for AES-GCM...');
   const sessionKey = await crypto.subtle.importKey(
     'raw',
     rawSessionKey as any,
@@ -173,18 +145,13 @@ export async function decryptFile(
     false,
     ['decrypt'],
   );
-  // console.log('[DEBUG] Session key imported successfully');
 
   // Step 4: Decrypt file chunks
-  // console.log('[DEBUG] Step 4: Decrypting file chunks...');
-  // console.log('[DEBUG] Total encrypted data size:', encryptedData.length);
-  // console.log('[DEBUG] Chunk data starts at offset:', METADATA_SIZE);
   const decryptedChunks: Uint8Array[] = [];
   let offset = METADATA_SIZE;
   let chunkIndex = 0;
 
   while (offset < encryptedData.length) {
-    console.log(`[DEBUG] Processing chunk ${chunkIndex} at offset ${offset}...`);
     // Read IV (12 bytes)
     if (offset + 12 > encryptedData.length) {
       throw new Error('Invalid encrypted file: incomplete IV');
@@ -207,21 +174,13 @@ export async function decryptFile(
     const encryptedChunk = encryptedData.subarray(offset, offset + chunkLength);
     offset += chunkLength;
 
-    console.log(`[DEBUG]   - IV size: ${chunkIv.length}, chunk length: ${chunkLength}, encrypted chunk size: ${encryptedChunk.length}`);
-
     // Decrypt chunk
-    try {
-      const decryptedChunk = await crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv: chunkIv as any },
-        sessionKey,
-        encryptedChunk as any,
-      );
-      console.log(`[DEBUG]   - Chunk ${chunkIndex} decrypted successfully, size: ${decryptedChunk.byteLength}`);
-      decryptedChunks.push(new Uint8Array(decryptedChunk));
-    } catch (error: any) {
-      console.error(`[DEBUG]   - Failed to decrypt chunk ${chunkIndex}:`, error.message);
-      throw new Error(`Failed to decrypt chunk ${chunkIndex}: ` + error.message);
-    }
+    const decryptedChunk = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: chunkIv as any },
+      sessionKey,
+      encryptedChunk as any,
+    );
+    decryptedChunks.push(new Uint8Array(decryptedChunk));
 
     chunkIndex++;
   }

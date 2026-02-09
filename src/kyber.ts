@@ -59,23 +59,6 @@ export async function kyberEncapsulate(
 }
 
 /**
- * Legacy function - use kyberEncapsulate instead
- * @deprecated Use kyberEncapsulate for proper KEM usage
- */
-export async function encryptWithKyber(
-  publicKey: Uint8Array,
-  data?: Uint8Array,
-): Promise<Uint8Array> {
-  if (publicKey.length !== 1568) {
-    throw new Error('Invalid Kyber public key size. Expected 1568 bytes.');
-  }
-
-  await ensureKyberReady();
-  const encryptedData = await kyber.encrypt(publicKey, data);
-  return encryptedData.cyphertext;
-}
-
-/**
  * Perform Kyber decapsulation (recovers shared secret)
  * @param ciphertext - Ciphertext from encapsulation
  * @param privateKey - Kyber private key (3168 bytes)
@@ -100,13 +83,3 @@ export async function kyberDecapsulate(
   return secret;
 }
 
-/**
- * Legacy function - use kyberDecapsulate instead
- * @deprecated Use kyberDecapsulate for proper KEM usage
- */
-export async function decryptWithKyber(
-  ciphertext: Uint8Array,
-  privateKey: Uint8Array,
-): Promise<Uint8Array> {
-  return kyberDecapsulate(ciphertext, privateKey);
-}

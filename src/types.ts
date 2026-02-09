@@ -72,3 +72,14 @@ export interface SymmetricEncryptedMessage {
   encryptedData: Uint8Array;
   salt: Uint8Array; // Salt used for key derivation (16 bytes)
 }
+
+/**
+ * Result of individual asymmetric group encryption
+ */
+export interface GroupEncryptedMessage {
+    encryptedData: Uint8Array;
+    wrappedKeys: {
+      kyberCipherText: Uint8Array;
+      wrappedSessionKey: Uint8Array;
+    }[];
+}
