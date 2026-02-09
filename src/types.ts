@@ -53,3 +53,33 @@ export interface FileMetadata {
   /** Version of the encryption format */
   version: string;
 }
+
+/**
+ * Result of message encryption
+ */
+export interface EncryptedMessage {
+  /** Complete encrypted message data (metadata + encrypted content) */
+  encryptedData: Uint8Array;
+  /** Kyber-encrypted session key (can be stored separately if needed) */
+  kyberEncryptedSessionKey: Uint8Array;
+}
+
+/**
+ * Result of symmetric message encryption
+ */
+export interface SymmetricEncryptedMessage {
+  /** Complete encrypted message data (metadata + encrypted content) */
+  encryptedData: Uint8Array;
+  salt: Uint8Array; // Salt used for key derivation (16 bytes)
+}
+
+/**
+ * Result of individual asymmetric group encryption
+ */
+export interface GroupEncryptedMessage {
+    encryptedData: Uint8Array;
+    wrappedKeys: {
+      kyberCipherText: Uint8Array;
+      wrappedSessionKey: Uint8Array;
+    }[];
+}

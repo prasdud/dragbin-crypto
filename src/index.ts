@@ -40,7 +40,7 @@
  */
 
 // Export types
-export type { KyberKeyPair, EncryptedFile, DerivedKey, EncryptedPrivateKey } from './types.js';
+export type { KyberKeyPair, EncryptedFile, DerivedKey, EncryptedPrivateKey, EncryptedMessage, SymmetricEncryptedMessage } from './types.js';
 
 // Export key generation
 export { generateKyberKeyPair as generateKeyPair } from './kyber.js';
@@ -57,4 +57,13 @@ export { decryptPrivateKey } from './decryption.js';
 export { deriveKeyFromPassword } from './keyDerivation.js';
 
 // Export utility functions
-export { generateSalt } from './utils.js';
+export { generateSalt, createFingerprint, compareFingerprints } from './utils.js';
+
+// Export message encryption/decryption
+export { encryptMessage, decryptMessage } from './message.js';
+
+// Export symmetric message encryption/decryption
+export { encryptSymmetricMessage, decryptSymmetricMessage } from './symmetric-message.js';
+
+// Export serialization utilities
+export { exportBytes, importBytes, exportKeyPair, importKeyPair } from './serialization.js';
